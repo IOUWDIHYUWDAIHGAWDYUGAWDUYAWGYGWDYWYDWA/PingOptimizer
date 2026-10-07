@@ -2,11 +2,6 @@ name: Minecraft Test Server with PingOptimizer
 
 on:
   workflow_dispatch:
-    inputs:
-      server_version:
-        description: 'Minecraft Version'
-        required: true
-        default: '1.21.1'
 
 jobs:
   run-server:
@@ -27,9 +22,8 @@ jobs:
       - name: Build PingOptimizer Plugin
         run: |
           mvn clean package -DskipTests
-          ls -la target/
 
-      - name: Setup Minecraft Server Directory
+      - name: Setup Minecraft Server Directory & ViaVersion
         run: |
           mkdir -p server/plugins
           cp target/PingOptimizer-1.0.0.jar server/plugins/PingOptimizer.jar
@@ -38,13 +32,15 @@ jobs:
           cat << 'EOF' > server.properties
           server-port=25565
           online-mode=false
-          motd=PingOptimizer Test Server
+          motd=§aPingOptimizer §7Test Server §8(1.21.x / ViaVersion)
           max-players=20
           view-distance=10
           simulation-distance=8
           difficulty=easy
           gamemode=survival
           EOF
+          # ViaVersion ekle (1.20 - 1.21.x tum surumlerin sorunsuz girmesi icin)
+          curl -sSL "https://hangarcdn.papermc.io/plugins/ViaVersion/ViaVersion/versions/5.2.1/PAPER/ViaVersion-5.2.1.jar" -o plugins/ViaVersion.jar || true
 
       - name: Download Paper 1.21.1 Server Jar
         run: |

@@ -88,4 +88,8 @@ public final class PingOptimizerPlugin extends JavaPlugin {
     public PingCalculationService getPingService() {
         return pingService;
     }
+
+    public LatencySynchronizer getLatencySynchronizer() {
+        return latencySynchronizer;
+    }
 }

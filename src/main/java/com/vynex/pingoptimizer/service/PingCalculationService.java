@@ -23,14 +23,24 @@ public class PingCalculationService {
     private int minimumFloor;
     private double percentageMultiplier;
     private boolean jitterSmoothing;
+    private volatile boolean optimizationEnabled = true;
 
     public void loadConfig(FileConfiguration config) {
+        this.optimizationEnabled = config.getBoolean("tab-ping.enabled", true);
         this.mode = config.getString("tab-ping.mode", "SMART_CURVE");
         this.targetGreenLimit = config.getInt("tab-ping.smart-curve.target-green-limit", 36);
         this.naturalVariation = config.getInt("tab-ping.smart-curve.natural-variation", 3);
         this.minimumFloor = config.getInt("tab-ping.smart-curve.minimum-floor", 16);
         this.percentageMultiplier = config.getDouble("tab-ping.percentage.multiplier", 0.30);
         this.jitterSmoothing = config.getBoolean("tab-ping.jitter-smoothing", true);
+    }
+
+    public boolean isOptimizationEnabled() {
+        return optimizationEnabled;
+    }
+
+    public void setOptimizationEnabled(boolean enabled) {
+        this.optimizationEnabled = enabled;
     }
 
     /**
@@ -61,7 +71,7 @@ public class PingCalculationService {
         }
 
         int rawPing = getRawPing(player);
-        if (rawPing <= minimumFloor) {
+        if (!optimizationEnabled || rawPing <= minimumFloor) {
             return rawPing;
         }
 

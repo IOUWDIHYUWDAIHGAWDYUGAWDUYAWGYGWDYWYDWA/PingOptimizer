@@ -51,6 +51,38 @@ public class PingOptimizerCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("on")) {
+            pingService.setOptimizationEnabled(true);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                plugin.getLatencySynchronizer().syncPlayerLatency(p);
+            }
+            sender.sendMessage(ChatColor.GREEN + "✓ PingOptimizer AÇILDI! Tab listesinde pingler optimize edilmiş olarak gösteriliyor.");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("off")) {
+            pingService.setOptimizationEnabled(false);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                plugin.getLatencySynchronizer().syncPlayerLatency(p);
+            }
+            sender.sendMessage(ChatColor.GOLD + "⚠ PingOptimizer KAPATILDI! Tab listesinde artık tamamen HAM (gerçek) ping gösteriliyor.");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("toggle")) {
+            boolean newState = !pingService.isOptimizationEnabled();
+            pingService.setOptimizationEnabled(newState);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                plugin.getLatencySynchronizer().syncPlayerLatency(p);
+            }
+            if (newState) {
+                sender.sendMessage(ChatColor.GREEN + "✓ PingOptimizer AÇILDI! (Tab optimize)");
+            } else {
+                sender.sendMessage(ChatColor.GOLD + "⚠ PingOptimizer KAPATILDI! (Tab orijinal ham ping)");
+            }
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("reload")) {
             plugin.reloadPluginConfig();
             sender.sendMessage(ChatColor.GREEN + "✓ PingOptimizer yapılandırması başarıyla yenilendi.");
@@ -84,7 +116,7 @@ public class PingOptimizerCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("stats", "reload", "set");
+            return Arrays.asList("stats", "on", "off", "toggle", "reload", "set");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
             List<String> names = new ArrayList<>();
