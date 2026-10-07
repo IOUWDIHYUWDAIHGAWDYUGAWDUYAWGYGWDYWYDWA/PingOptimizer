@@ -1,0 +1,54 @@
+# ========================================================
+#             PingOptimizer by Vynex
+#   Advanced Netty Pipeline & Tablist Latency Engine
+# ========================================================
+
+# 1. Gerçek Ağ & Netty Soket Hızlandırma
+network:
+  # Nagle algoritmasını kapatarak paketlerin kuyrukta beklemesini önler (0 ms buffer gecikmesi)
+  tcp-nodelay: true
+  # Netty yazma tamponunu optimize eder
+  tune-write-buffers: true
+  # Hızlı paket flush modu
+  instant-packet-flush: true
+
+# 2. Tab Listesi & İstemci Ping Optimizasyonu
+tab-ping:
+  enabled: true
+  
+  # Modlar:
+  # - SMART_CURVE: Yüksek pingleri (örn: 134 ms, 61 ms) doğal bir eğriyle yeşil banda (20-35 ms) çeker.
+  #                Düşük pingli (18-22 ms) oyuncuları bozmaz, yüksek olanları aşağı indirir.
+  # - PERCENTAGE: Tüm pingleri belirlenen katsayı ile çarpar (örn: 0.35).
+  # - FIXED_CAP: Belirlenen değerin üzerindeki tüm pingleri o değere sabitler.
+  mode: "SMART_CURVE"
+
+  # SMART_CURVE ayarları:
+  smart-curve:
+    # Hedef üst limit (Tab'da görünecek ideal yeşil ping üst sınırı)
+    target-green-limit: 36
+    # Doğal dalgalanma payı (Örn: 2 ms yukarı-aşağı oynar ki yapay durmasın)
+    natural-variation: 3
+    # Gösterilecek en düşük ping tabanı
+    minimum-floor: 16
+
+  # PERCENTAGE modu seçilirse:
+  percentage:
+    multiplier: 0.30  # 134 ms * 0.30 ≈ 40 ms
+
+  # Ping dalgalanmasını (Jitter) yumuşatıp anlık sıçramaları önler
+  jitter-smoothing: true
+
+# 3. Kötü İnternetli Oyuncular İçin Anti-Rubberband (Geriye Atmayı Önleme)
+anti-rubberband:
+  enabled: true
+  # Paket gecikmesi yaşayan oyuncular için esneme toleransı (milisaniye)
+  leniency-window-ms: 150
+
+# 4. PlaceholderAPI Ayarları
+# TAB eklentinizde şu değişkenleri kullanabilirsiniz:
+# %pingoptimizer_ping%       -> Optimize edilmiş, düşürülmüş ping (Örn: 24 ms)
+# %pingoptimizer_raw_ping%   -> Ham, gerçek ping (Örn: 134 ms)
+# %pingoptimizer_saved_ms%   -> Ne kadar düşürüldüğü (Örn: 102 ms)
+placeholders:
+  colored: true # Renk kodlarını otomatik ekler (&a24 ms gibi)

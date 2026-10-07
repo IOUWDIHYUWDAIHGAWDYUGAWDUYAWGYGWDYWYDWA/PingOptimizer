@@ -1,0 +1,20 @@
+name: PingOptimizer
+version: '${project.version}'
+main: com.vynex.pingoptimizer.PingOptimizerPlugin
+api-version: '1.21'
+author: Vynex
+description: Advanced Netty Pipeline and Tablist Ping Optimizer for Paper 1.21.x
+softdepend:
+  - PlaceholderAPI
+commands:
+  pingoptimizer:
+    description: PingOptimizer commands
+    aliases:
+      - po
+      - pingopt
+    permission: pingoptimizer.admin
+    usage: /<command> [reload|stats|set <player> <ms>]
+permissions:
+  pingoptimizer.admin:
+    description: Allows administrative control of PingOptimizer
+    default: op

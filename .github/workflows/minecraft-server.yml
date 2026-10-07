@@ -1,0 +1,76 @@
+name: Minecraft Test Server with PingOptimizer
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_version:
+        description: 'Minecraft Version'
+        required: true
+        default: '1.21.1'
+
+jobs:
+  run-server:
+    runs-on: ubuntu-latest
+    name: Run Paper 1.21.1 Server
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build PingOptimizer Plugin
+        run: |
+          mvn clean package -DskipTests
+          ls -la target/
+
+      - name: Setup Minecraft Server Directory
+        run: |
+          mkdir -p server/plugins
+          cp target/PingOptimizer-1.0.0.jar server/plugins/PingOptimizer.jar
+          cd server
+          echo "eula=true" > eula.txt
+          cat << 'EOF' > server.properties
+          server-port=25565
+          online-mode=false
+          motd=PingOptimizer Test Server
+          max-players=20
+          view-distance=10
+          simulation-distance=8
+          difficulty=easy
+          gamemode=survival
+          EOF
+
+      - name: Download Paper 1.21.1 Server Jar
+        run: |
+          cd server
+          curl -sSL "https://api.purpurmc.org/v2/purpur/1.21.1/2329/download" -o server.jar
+
+      - name: Install Playit.gg Tunnel (Public Server IP)
+        run: |
+          curl -SsL https://playit-cloud.github.io/ppa/key.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/playit.gpg >/dev/null
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/playit.gpg] https://playit-cloud.github.io/ppa/data ./" | sudo tee /etc/apt/sources.list.d/playit.list >/dev/null
+          sudo apt-get update -y
+          sudo apt-get install -y playit
+
+      - name: Start Playit.gg Tunnel in Background
+        run: |
+          echo "Starting playit.gg tunnel..."
+          playit --secret_path playit_secret.toml start > playit.log 2>&1 &
+          sleep 6
+          echo "=========================================================="
+          echo "PLAYIT TUNNEL LOGS (Sunucu Baglanti Adresi Asagidadir):"
+          echo "=========================================================="
+          cat playit.log || true
+          echo "=========================================================="
+
+      - name: Start Minecraft Server
+        run: |
+          cd server
+          echo "Starting Minecraft Server with PingOptimizer..."
+          java -Xms4G -Xmx6G -jar server.jar --nogui
