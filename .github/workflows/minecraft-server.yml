@@ -6,7 +6,7 @@ on:
 jobs:
   run-server:
     runs-on: ubuntu-latest
-    name: Run Paper 1.21.1 Server
+    name: Run Paper 1.21.11 Server
 
     steps:
       - name: Checkout Repository
@@ -41,10 +41,10 @@ jobs:
           EOF
           curl -sSL "https://hangarcdn.papermc.io/plugins/ViaVersion/ViaVersion/versions/5.2.1/PAPER/ViaVersion-5.2.1.jar" -o plugins/ViaVersion.jar || true
 
-      - name: Download Paper 1.21.1 Server Jar
+      - name: Download Paper 1.21.11 Server Jar
         run: |
           cd server
-          curl -sSL "https://api.purpurmc.org/v2/purpur/1.21.1/2329/download" -o server.jar
+          curl -sSL "https://api.purpurmc.org/v2/purpur/1.21.11/2568/download" -o server.jar
 
       - name: Start TCP Tunnels (Pinggy & Playit)
         run: |
