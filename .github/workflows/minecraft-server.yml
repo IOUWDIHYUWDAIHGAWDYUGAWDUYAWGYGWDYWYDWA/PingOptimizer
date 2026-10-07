@@ -46,28 +46,27 @@ jobs:
           cd server
           curl -sSL "https://api.purpurmc.org/v2/purpur/1.21.1/2329/download" -o server.jar
 
-      - name: Install & Start Playit.gg Tunnel
+      - name: Start TCP Tunnels (Pinggy & Playit)
         run: |
-          curl -SsL https://playit-cloud.github.io/ppa/key.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/playit.gpg >/dev/null
-          echo "deb [signed-by=/etc/apt/trusted.gpg.d/playit.gpg] https://playit-cloud.github.io/ppa/data ./" | sudo tee /etc/apt/sources.list.d/playit.list >/dev/null
-          sudo apt-get update -y
-          sudo apt-get install -y playit
-          sudo systemctl restart playit
-          sleep 6
-          echo "=========================================================="
-          echo "PLAYIT.GG BAGLANTI BILGISI:"
-          echo "=========================================================="
-          sudo journalctl -u playit -n 35 --no-pager || true
-          echo "=========================================================="
+          # 1. Pinggy TCP Tuneli (Minecraft icin ozel TCP tünel)
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:25565 tcp@a.pinggy.io > pinggy.log 2>&1 &
+          
+          # 2. Playit Standalone Agent
+          curl -sSL "https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-amd64" -o playit-bin
+          chmod +x playit-bin
+          ./playit-bin start --secret_path playit_secret.toml > playit.log 2>&1 &
 
-      - name: Start Pinggy Backup Tunnel (Aninda Direkt IP)
-        run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:25565 a.pinggy.io > pinggy.log 2>&1 &
-          sleep 5
+          sleep 8
+
           echo "=========================================================="
-          echo "PINGGY DIREKT BAGLANTI ADRESI:"
+          echo "1. PINGGY DIREKT MINECRAFT TCP IP ADRESI:"
           echo "=========================================================="
           cat pinggy.log || true
+          echo ""
+          echo "=========================================================="
+          echo "2. PLAYIT.GG CLAIM BAGLANTISI:"
+          echo "=========================================================="
+          cat playit.log || true
           echo "=========================================================="
 
       - name: Start Minecraft Server
