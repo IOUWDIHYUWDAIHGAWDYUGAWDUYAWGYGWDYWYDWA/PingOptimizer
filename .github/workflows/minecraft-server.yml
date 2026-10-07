@@ -39,7 +39,6 @@ jobs:
           difficulty=easy
           gamemode=survival
           EOF
-          # ViaVersion ekle (1.20 - 1.21.x tum surumlerin sorunsuz girmesi icin)
           curl -sSL "https://hangarcdn.papermc.io/plugins/ViaVersion/ViaVersion/versions/5.2.1/PAPER/ViaVersion-5.2.1.jar" -o plugins/ViaVersion.jar || true
 
       - name: Download Paper 1.21.1 Server Jar
@@ -47,22 +46,28 @@ jobs:
           cd server
           curl -sSL "https://api.purpurmc.org/v2/purpur/1.21.1/2329/download" -o server.jar
 
-      - name: Install Playit.gg Tunnel (Public Server IP)
+      - name: Install & Start Playit.gg Tunnel
         run: |
           curl -SsL https://playit-cloud.github.io/ppa/key.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/playit.gpg >/dev/null
           echo "deb [signed-by=/etc/apt/trusted.gpg.d/playit.gpg] https://playit-cloud.github.io/ppa/data ./" | sudo tee /etc/apt/sources.list.d/playit.list >/dev/null
           sudo apt-get update -y
           sudo apt-get install -y playit
+          sudo systemctl restart playit
+          sleep 6
+          echo "=========================================================="
+          echo "PLAYIT.GG BAGLANTI BILGISI:"
+          echo "=========================================================="
+          sudo journalctl -u playit -n 35 --no-pager || true
+          echo "=========================================================="
 
-      - name: Start Playit.gg Tunnel in Background
+      - name: Start Pinggy Backup Tunnel (Aninda Direkt IP)
         run: |
-          echo "Starting playit.gg tunnel..."
-          playit > playit.log 2>&1 &
-          sleep 10
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:25565 a.pinggy.io > pinggy.log 2>&1 &
+          sleep 5
           echo "=========================================================="
-          echo "PLAYIT TUNNEL LOGS (Sunucu Baglanti Adresi Asagidadir):"
+          echo "PINGGY DIREKT BAGLANTI ADRESI:"
           echo "=========================================================="
-          cat playit.log || true
+          cat pinggy.log || true
           echo "=========================================================="
 
       - name: Start Minecraft Server
