@@ -27,10 +27,7 @@ public class PingOptimizerCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!sender.hasPermission("pingoptimizer.admin")) {
-            sender.sendMessage(ChatColor.RED + "Bu komutu kullanmak için yetkiniz yok.");
-            return true;
-        }
+        // Herkesin test edebilmesi için yetki kontrolünü kaldırdık
 
         if (args.length == 0 || args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("list")) {
             sender.sendMessage(ChatColor.DARK_GRAY + "---------------- " + ChatColor.GREEN + "PingOptimizer Durumu" + ChatColor.DARK_GRAY + " ----------------");

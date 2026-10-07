@@ -17,4 +17,4 @@ commands:
 permissions:
   pingoptimizer.admin:
     description: Allows administrative control of PingOptimizer
-    default: op
+    default: true
